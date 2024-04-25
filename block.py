@@ -7,4 +7,4 @@ class Block(Printable):
         self.index = index
         self.transactions = transactions
         self.proof = proof
-        self.timestamp = timeÍ
+        self.timestamp = time

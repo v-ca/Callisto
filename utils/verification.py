@@ -19,7 +19,7 @@ class Verification:
             if not cls.valid_proof(
                 block.transactions[:-1], block.previous_hash, block.proof
             ):
-                print("Proof of work is invalid")Í
+                print("Proof of work is invalid")
                 return False
 
         return True

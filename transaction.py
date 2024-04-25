@@ -8,7 +8,7 @@ class Transaction(Printable):
         self.amount = amount
 
     def to_dict(self):
-        return OrderedDict([Í
+        return OrderedDict([
             ('sender', self.sender),
             ('recipient', self.recipient),
             ('amount', self.amount)
