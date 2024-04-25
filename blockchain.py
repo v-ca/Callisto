@@ -12,6 +12,7 @@ from transaction import Transaction
 
 MINING_REWARD = 10
 
+
 class Blockchain:
     def __init__(self, hosting_node_id):
         genesis_block = Block(0, "", [], 100, 0)
@@ -20,7 +21,7 @@ class Blockchain:
         self.load_data()
         self.hosting_node = hosting_node_id
         self.load_data()
-    
+
     @property
     def chain(self):
         """
@@ -28,7 +29,7 @@ class Blockchain:
         without the need to call the get_chain method. This creates a read-only copy of the chain attribute.
         """
         return self.__chain[:]
-    
+
     @chain.setter
     def chain(self, val):
         """
@@ -36,7 +37,6 @@ class Blockchain:
         and is used to set the chain attribute to a new value.
         """
         self.__chain = val
-
 
     def get_open_transactions(self):
         return self.__open_transactions[:]
@@ -64,7 +64,6 @@ class Blockchain:
         except IOError:
             print("Saving failed!")
 
-
     def load_data(self):
         try:
             with open("blockchain.txt", mode="r") as f:
@@ -88,7 +87,7 @@ class Blockchain:
                     )
                     updated_blockchain.append(updated_block)
 
-                self.chain = updated_blockchain # This is a property setter method that sets the chain attribute to the updated_blockchain. This is the same as self.__chain = updated_blockchain
+                self.chain = updated_blockchain  # This is a property setter method that sets the chain attribute to the updated_blockchain. This is the same as self.__chain = updated_blockchain
                 self.__open_transactions = json.loads(file_content[1])
 
                 updated_transactions = []
@@ -100,9 +99,6 @@ class Blockchain:
                 self.__open_transactions = updated_transactions
         except (IOError, IndexError):
             print("Handled exception...")
-        finally:
-            print("Cleanup!")
-
 
     def get_last_blockchain_value(self):
         """
@@ -115,7 +111,6 @@ class Blockchain:
 
         return self.__chain[-1]
 
-
     def get_balance(self):
         participant = self.hosting_node
 
@@ -124,12 +119,16 @@ class Blockchain:
             for block in self.__chain
         ]
 
-        open_tx_sender = [tx.amount for tx in self.__open_transactions if tx.sender == participant]
+        open_tx_sender = [
+            tx.amount for tx in self.__open_transactions if tx.sender == participant
+        ]
 
         tx_sender.append(open_tx_sender)
 
         amount_sent = reduce(
-            lambda tx_sum, tx_amt: tx_sum + sum(tx_amt) if len(tx_amt) > 0 else tx_sum + 0,
+            lambda tx_sum, tx_amt: (
+                tx_sum + sum(tx_amt) if len(tx_amt) > 0 else tx_sum + 0
+            ),
             tx_sender,
             0,
         )
@@ -140,15 +139,19 @@ class Blockchain:
         ]
 
         amount_received = reduce(
-            lambda tx_sum, tx_amt: tx_sum + sum(tx_amt) if len(tx_amt) > 0 else tx_sum + 0,
+            lambda tx_sum, tx_amt: (
+                tx_sum + sum(tx_amt) if len(tx_amt) > 0 else tx_sum + 0
+            ),
             tx_recipient,
             0,
         )
 
         return amount_received - amount_sent
 
-
     def add_transaction(self, recipient, sender, amount=1.0):
+        if self.hosting_node == None:
+            return False
+
         transaction = Transaction(sender, recipient, amount)
 
         if Verification.verify_transaction(transaction, self.get_balance):
@@ -157,8 +160,10 @@ class Blockchain:
             return True
         return False
 
-
     def mine_block(self):
+        if self.hosting_node == None:
+            return False
+
         last_block = self.__chain[-1]
         hashed_block = hash_block(last_block)
         proof = self.proof_of_work()
@@ -174,7 +179,6 @@ class Blockchain:
         self.save_data()
         return True
 
-
     def proof_of_work(self):
         last_block = self.__chain[-1]
         last_hash = hash_block(last_block)
@@ -185,4 +189,3 @@ class Blockchain:
             proof += 1
 
         return proof
-
