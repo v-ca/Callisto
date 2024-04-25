@@ -1,7 +1,7 @@
 from uuid import uuid4
 
-from printable import Printable
-from verification import Verification
+from utils.printable import Printable
+from utils.verification import Verification
 from blockchain import Blockchain
 
 
@@ -19,11 +19,14 @@ class Node(Printable):
     def get_transaction_value(self):
         tx_recipient = input("Enter the recipient of the transaction: ")
         tx_amount = float(input("Enter your transaction amount: "))
-
+        if str(tx_amount) or tx_amount < 0:
+            print("Amount set to 0.")
+            tx_amount = 0
+        
         return tx_recipient, tx_amount
 
     def print_blockchain_elements(self):
-        for block in self.blockchain.chain:
+        for block in self.blockchain.chain: # we don't need a getter method because the chain is public using the @property decorator
             print("\nOutputting Block")
             print(block)
         else:
@@ -47,7 +50,7 @@ class Node(Printable):
                     print("Transaction added!")
                 else:
                     print("Transaction failed!")
-                print(self.blockchain.open_transactions)
+                print(self.blockchain.get_open_transactions())
 
             elif user_choice == "2":
                 self.print_blockchain_elements()
@@ -56,8 +59,8 @@ class Node(Printable):
                 self.blockchain.mine_block()
 
             elif user_choice == "4":
-                verifier = Verification()
-                if verifier.verify_transactions(self.blockchain.open_transactions, self.blockchain.get_balance):
+                # verifier = Verification() # This is not needed because the method is a class method
+                if Verification.verify_transactions(self.blockchain.get_open_transactions(), self.blockchain.get_balance):
                     print("\nAll transactions are valid!\n")
                 else:
                     print("\nThere are invalid transactions!\n")
@@ -66,8 +69,7 @@ class Node(Printable):
                 waiting_for_input = False
             else:
                 print("\nInvalid input, please pick a value from the list!")
-            verifier = Verification()
-            if not verifier.verify_chain(self.blockchain.chain):
+            if not Verification.verify_chain(self.blockchain.chain):
                 self.print_blockchain_elements()
                 print("\nInvalid blockchain!\n")
                 break
